@@ -57,7 +57,7 @@ model_layer_dict1, model_layer_dict2, model_layer_dict3 = init_coverage_tables(m
 
 # ==============================================================================================
 # start gen inputs
-for _ in xrange(args.seeds):
+for _ in range(args.seeds):
     gen_img = np.expand_dims(random.choice(x_test), axis=0)
     orig_img = gen_img.copy()
     # first check if input already induces differences
@@ -72,7 +72,7 @@ for _ in xrange(args.seeds):
         update_coverage(gen_img, model2, model_layer_dict2, args.threshold)
         update_coverage(gen_img, model3, model_layer_dict3, args.threshold)
 
-        print(bcolors.OKGREEN + 'covered neurons percentage %d neurons %.3f, %d neurons %.3f, %d neurons %.3f'
+        print(bcolors.WARNING + 'covered neurons percentage %d neurons %.3f, %d neurons %.3f, %d neurons %.3f'
               % (len(model_layer_dict1), neuron_covered(model_layer_dict1)[2], len(model_layer_dict2),
                  neuron_covered(model_layer_dict2)[2], len(model_layer_dict3),
                  neuron_covered(model_layer_dict3)[2]) + bcolors.ENDC)
@@ -81,7 +81,7 @@ for _ in xrange(args.seeds):
             neuron_covered(model_layer_dict1)[1] + neuron_covered(model_layer_dict2)[1] +
             neuron_covered(model_layer_dict3)[
                 1])
-        print(bcolors.OKGREEN + 'averaged covered neurons %.3f' % averaged_nc + bcolors.ENDC)
+        print(bcolors.WARNING + 'averaged covered neurons %.3f' % averaged_nc + bcolors.ENDC)
 
         gen_img_deprocessed = deprocess_image(gen_img)
 
@@ -124,7 +124,7 @@ for _ in xrange(args.seeds):
     iterate = K.function([input_tensor], [loss1, loss2, loss3, loss1_neuron, loss2_neuron, loss3_neuron, grads])
 
     # we run gradient ascent for 20 steps
-    for iters in xrange(args.grad_iterations):
+    for iters in range(args.grad_iterations):
         loss_value1, loss_value2, loss_value3, loss_neuron1, loss_neuron2, loss_neuron3, grads_value = iterate(
             [gen_img])
         if args.transformation == 'light':
@@ -145,7 +145,7 @@ for _ in xrange(args.seeds):
             update_coverage(gen_img, model2, model_layer_dict2, args.threshold)
             update_coverage(gen_img, model3, model_layer_dict3, args.threshold)
 
-            print(bcolors.OKGREEN + 'covered neurons percentage %d neurons %.3f, %d neurons %.3f, %d neurons %.3f'
+            print(bcolors.WARNING + 'covered neurons percentage %d neurons %.3f, %d neurons %.3f, %d neurons %.3f'
                   % (len(model_layer_dict1), neuron_covered(model_layer_dict1)[2], len(model_layer_dict2),
                      neuron_covered(model_layer_dict2)[2], len(model_layer_dict3),
                      neuron_covered(model_layer_dict3)[2]) + bcolors.ENDC)
@@ -154,7 +154,7 @@ for _ in xrange(args.seeds):
                 neuron_covered(model_layer_dict1)[1] + neuron_covered(model_layer_dict2)[1] +
                 neuron_covered(model_layer_dict3)[
                     1])
-            print(bcolors.OKGREEN + 'averaged covered neurons %.3f' % averaged_nc + bcolors.ENDC)
+            print(bcolors.WARNING + 'averaged covered neurons %.3f' % averaged_nc + bcolors.ENDC)
 
             gen_img_deprocessed = deprocess_image(gen_img)
             orig_img_deprocessed = deprocess_image(orig_img)
