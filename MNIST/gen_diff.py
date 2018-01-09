@@ -127,7 +127,7 @@ for _ in range(args.seeds):
     for iters in range(args.grad_iterations):
         loss_value1, loss_value2, loss_value3, loss_neuron1, loss_neuron2, loss_neuron3, grads_value = iterate(
             [gen_img])
-        if args.transformation == 'light':
+        if   args.transformation == 'light':
             grads_value = constraint_light(grads_value)  # constraint the gradients value
         elif args.transformation == 'occl':
             grads_value = constraint_occl(grads_value, args.start_point,
@@ -167,3 +167,6 @@ for _ in range(args.seeds):
                 predictions2) + '_' + str(predictions3) + '_orig.png',
                    orig_img_deprocessed)
             break
+
+print("=== WARNING(about file name) ===")
+print("(transformation name)_(1stPREDICTION)_(2ndPREDICTION)_(3rdPREDITION)")
