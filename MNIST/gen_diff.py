@@ -19,10 +19,16 @@ from utils import *
 # read the parameter
 # argument parsing
 parser = argparse.ArgumentParser(description='Main function for difference-inducing input generation in MNIST dataset')
+# 画像に加えるノイズの設定.
+#light           : 輝度変化
+#occl(occlusion) : 透過ノイズを乗せてる 論文の例を参照するとイメージしやすい
+#                  (矩形のサイズは調節可能)
+#black           : 黒点(矩形のサイズは調節可能)
 parser.add_argument('transformation', help="realistic transformation type", choices=['light', 'occl', 'blackout'])
 parser.add_argument('weight_diff', help="weight hyperparm to control differential behavior", type=float)
 parser.add_argument('weight_nc', help="weight hyperparm to control neuron coverage", type=float)
 parser.add_argument('step', help="step size of gradient descent", type=float)
+#seeds:3つのモデルのうち1つ以上が別のラベルと推測するような入力の生成数を設定するパラメーター
 parser.add_argument('seeds', help="number of seeds of input", type=int)
 parser.add_argument('grad_iterations', help="number of iterations of gradient descent", type=int)
 parser.add_argument('threshold', help="threshold for determining neuron activated", type=float)
