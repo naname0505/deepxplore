@@ -44,6 +44,7 @@ def constraint_black(gradients, rect_shape=(6, 6)):
 
 
 def init_coverage_tables(model1, model2, model3):
+    #defaultdict from Collections Class
     model_layer_dict1 = defaultdict(bool)
     model_layer_dict2 = defaultdict(bool)
     model_layer_dict3 = defaultdict(bool)
@@ -55,14 +56,19 @@ def init_coverage_tables(model1, model2, model3):
 
 def init_dict(model, model_layer_dict):
     for layer in model.layers:
+        # "flatten" layerは平滑化を行う層
+        # 詳しくは https://keras.io/ja/layers/core/ を参照
         if 'flatten' in layer.name or 'input' in layer.name:
-            continue
+            continue # "flatten"と"input"層は辞書に追加せずにスルー 
         for index in range(layer.output_shape[-1]):
             model_layer_dict[(layer.name, index)] = False
 
 
 def neuron_to_cover(model_layer_dict):
     not_covered = [(layer_name, index) for (layer_name, index), v in model_layer_dict.items() if not v]
+    print("##############")
+    print(not_covered)
+    print("##############")
     if not_covered:
         layer_name, index = random.choice(not_covered)
     else:

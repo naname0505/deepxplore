@@ -52,8 +52,15 @@ model1 = Model1(input_tensor=input_tensor)
 model2 = Model2(input_tensor=input_tensor)
 model3 = Model3(input_tensor=input_tensor)
 
+"""
+print(model1.summary())
+print(model2.summary())
+print(model3.summary())
+"""
+
 # init coverage table
 model_layer_dict1, model_layer_dict2, model_layer_dict3 = init_coverage_tables(model1, model2, model3)
+print(model_layer_dict1)
 
 # ==============================================================================================
 # start gen inputs
@@ -61,26 +68,30 @@ for _ in range(args.seeds):
     gen_img = np.expand_dims(random.choice(x_test), axis=0)
     orig_img = gen_img.copy()
     # first check if input already induces differences
-    label1, label2, label3 = np.argmax(model1.predict(gen_img)[0]), np.argmax(model2.predict(gen_img)[0]), np.argmax(
-        model3.predict(gen_img)[0])
+    label1, label2, label3 = np.argmax(model1.predict(gen_img)[0]), \
+                             np.argmax(model2.predict(gen_img)[0]), \
+                             np.argmax(model3.predict(gen_img)[0])
 
     if not label1 == label2 == label3:
-        print(bcolors.OKGREEN + 'input already causes different outputs: {}, {}, {}'.format(label1, label2,
-                                                                                            label3) + bcolors.ENDC)
+        print(bcolors.OKGREEN + 
+                'input already causes different outputs: {}, {}, {}'.format(label1,label2,label3) + bcolors.ENDC)
 
         update_coverage(gen_img, model1, model_layer_dict1, args.threshold)
         update_coverage(gen_img, model2, model_layer_dict2, args.threshold)
         update_coverage(gen_img, model3, model_layer_dict3, args.threshold)
 
-        print(bcolors.WARNING + 'covered neurons percentage %d neurons %.3f, %d neurons %.3f, %d neurons %.3f'
-              % (len(model_layer_dict1), neuron_covered(model_layer_dict1)[2], len(model_layer_dict2),
+        print(bcolors.WARNING + 
+                'covered neurons percentage %d neurons %.3f, %d neurons %.3f, %d neurons %.3f'
+              % (len(model_layer_dict1), neuron_covered(model_layer_dict1)[2],
+                 len(model_layer_dict2),
                  neuron_covered(model_layer_dict2)[2], len(model_layer_dict3),
                  neuron_covered(model_layer_dict3)[2]) + bcolors.ENDC)
+
         averaged_nc = (neuron_covered(model_layer_dict1)[0] + neuron_covered(model_layer_dict2)[0] +
                        neuron_covered(model_layer_dict3)[0]) / float(
             neuron_covered(model_layer_dict1)[1] + neuron_covered(model_layer_dict2)[1] +
-            neuron_covered(model_layer_dict3)[
-                1])
+            neuron_covered(model_layer_dict3)[1])
+
         print(bcolors.WARNING + 'averaged covered neurons %.3f' % averaged_nc + bcolors.ENDC)
 
         gen_img_deprocessed = deprocess_image(gen_img)
@@ -90,25 +101,33 @@ for _ in range(args.seeds):
             label2) + '_' + str(label3) + '.png', gen_img_deprocessed)
         continue
 
-    # if all label agrees
-    orig_label = label1
-    layer_name1, index1 = neuron_to_cover(model_layer_dict1)
-    layer_name2, index2 = neuron_to_cover(model_layer_dict2)
-    layer_name3, index3 = neuron_to_cover(model_layer_dict3)
+    # 上記のif文で既に3つのモデルに対して出力ラベルが異なっていた場合の処理を記述
+    # else(即ち,3つの出力ラベルの値が一致しているとき)時の処理がメインなので以下で処理
+    # if all label agrees <= 3つのモデル全ての出力ラベルが一致しているということ
+    orig_label = label1 # <= 別にlabel2でもlabel3でも構わない, 全て同じ結果なので
+    layer_name1, index1 = neuron_to_cover(model_layer_dict1) # init_coverage_tablesによって作成
+    layer_name2, index2 = neuron_to_cover(model_layer_dict2) # init_coverage_tablesによって作成
+    layer_name3, index3 = neuron_to_cover(model_layer_dict3) # init_coverage_tablesによって作成
 
     # construct joint loss function
-    if args.target_model == 0:
+    # target_modelは3つのうちにどのモデルが他と違う出力ラベルようにさせるかを指定するパラメーター
+    # 当たり前だけれどもMNISTなので0-9の10個の"before_softmax"が存在
+
+    if   args.target_model == 0: # モデル0に対して実行します
         loss1 = -args.weight_diff * K.mean(model1.get_layer('before_softmax').output[..., orig_label])
-        loss2 = K.mean(model2.get_layer('before_softmax').output[..., orig_label])
-        loss3 = K.mean(model3.get_layer('before_softmax').output[..., orig_label])
-    elif args.target_model == 1:
-        loss1 = K.mean(model1.get_layer('before_softmax').output[..., orig_label])
+        loss2 = K.mean(model2.get_layer('before_softmax').output[..., orig_label]) #任意の行のorig_label列目のみ
+        loss3 = K.mean(model3.get_layer('before_softmax').output[..., orig_label]) #任意の行のorig_label列目のみ
+
+    elif args.target_model == 1: # モデル1に対して実行します
+        loss1 = K.mean(model1.get_layer('before_softmax').output[..., orig_label]) #任意の行のorig_label列目のみ
         loss2 = -args.weight_diff * K.mean(model2.get_layer('before_softmax').output[..., orig_label])
-        loss3 = K.mean(model3.get_layer('before_softmax').output[..., orig_label])
-    elif args.target_model == 2:
-        loss1 = K.mean(model1.get_layer('before_softmax').output[..., orig_label])
-        loss2 = K.mean(model2.get_layer('before_softmax').output[..., orig_label])
+        loss3 = K.mean(model3.get_layer('before_softmax').output[..., orig_label]) #任意の行のorig_label列目のみ
+
+    elif args.target_model == 2: # モデル2に対して実行します
+        loss1 = K.mean(model1.get_layer('before_softmax').output[..., orig_label]) #任意の行のorig_label列目のみ
+        loss2 = K.mean(model2.get_layer('before_softmax').output[..., orig_label]) #任意の行のorig_label列目のみ
         loss3 = -args.weight_diff * K.mean(model3.get_layer('before_softmax').output[..., orig_label])
+    
     loss1_neuron = K.mean(model1.get_layer(layer_name1).output[..., index1])
     loss2_neuron = K.mean(model2.get_layer(layer_name2).output[..., index2])
     loss3_neuron = K.mean(model3.get_layer(layer_name3).output[..., index3])
@@ -116,9 +135,11 @@ for _ in range(args.seeds):
 
     # for adversarial image generation
     final_loss = K.mean(layer_output)
+    print(final_loss)
 
     # we compute the gradient of the input picture wrt this loss
     grads = normalize(K.gradients(final_loss, input_tensor)[0])
+    print(grads)
 
     # this function returns the loss and grads given the input picture
     iterate = K.function([input_tensor], [loss1, loss2, loss3, loss1_neuron, loss2_neuron, loss3_neuron, grads])
