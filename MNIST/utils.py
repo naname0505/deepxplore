@@ -67,7 +67,7 @@ def init_dict(model, model_layer_dict):
 def neuron_to_cover(model_layer_dict):
     not_covered = [(layer_name, index) for (layer_name, index), v in model_layer_dict.items() if not v]
     print("##############")
-    print(not_covered)
+    #print(not_covered)
     print("##############")
     if not_covered:
         layer_name, index = random.choice(not_covered)
@@ -77,6 +77,7 @@ def neuron_to_cover(model_layer_dict):
 
 
 def neuron_covered(model_layer_dict):
+    #model_layer_dict.valuesはmodel内の層(neuronの数分)と,活性化の有無を示すTrue or Falseが記述
     covered_neurons = len([v for v in model_layer_dict.values() if v])
     total_neurons = len(model_layer_dict)
     return covered_neurons, total_neurons, covered_neurons / float(total_neurons)
@@ -85,16 +86,18 @@ def neuron_covered(model_layer_dict):
 def update_coverage(input_data, model, model_layer_dict, threshold=0):
     layer_names = [layer.name for layer in model.layers if
                    'flatten' not in layer.name and 'input' not in layer.name]
-
+    # ここからkeras_nural.py のshow_intermediateと似た内容
+    # 中間層を出力とするmodelを定義して, 実際にデータを入力することで中間層の出力を保持する
+    # 中間層の値を出力層の値とするようなmodelを定義 
     intermediate_layer_model = Model(inputs=model.input,
                                      outputs=[model.get_layer(layer_name).output for layer_name in layer_names])
     intermediate_layer_outputs = intermediate_layer_model.predict(input_data)
 
     for i, intermediate_layer_output in enumerate(intermediate_layer_outputs):
-        scaled = scale(intermediate_layer_output[0])
+        scaled = scale(intermediate_layer_output[0]) #確か[0]がテスト,[1]が学習.これによってDOの有無とかを変更している. 要API参照
         for num_neuron in range(scaled.shape[-1]):
-            if np.mean(scaled[..., num_neuron]) > threshold and not model_layer_dict[(layer_names[i], num_neuron)]:
-                model_layer_dict[(layer_names[i], num_neuron)] = True
+            if np.mean(scaled[..., num_neuron]) > threshold and not model_layer_dict[(layer_names[i], num_neuron)]: # 平均が閾値(0-1)を越えて且つdictのboolがFalseなら
+                model_layer_dict[(layer_names[i], num_neuron)] = True #dictをTrueに
 
 
 def full_coverage(model_layer_dict):
@@ -104,9 +107,14 @@ def full_coverage(model_layer_dict):
 
 
 def scale(intermediate_layer_output, rmax=1, rmin=0):
+    #           中間層の出力から最小値を引いたもの
+    # X_std =  -------------------------------------
+    #            中間層の出力の最大値と最小値の差
+    # 配列になっていて, それぞれの値は0-1の間(小数含む)
+
     X_std = (intermediate_layer_output - intermediate_layer_output.min()) / (
         intermediate_layer_output.max() - intermediate_layer_output.min())
-    X_scaled = X_std * (rmax - rmin) + rmin
+    X_scaled = (X_std * (rmax - rmin)) + rmin # 今のところX_scaled = X_std
     return X_scaled
 
 

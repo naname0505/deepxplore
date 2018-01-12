@@ -51,6 +51,7 @@ x_test = x_test.astype('float32')
 x_test /= 255
 
 # define input tensor as a placeholder
+# テンソルを確保する処理 kera.layers.Input
 input_tensor = Input(shape=input_shape)
 
 # load multiple models sharing same input tensor
@@ -66,7 +67,7 @@ print(model3.summary())
 
 # init coverage table
 model_layer_dict1, model_layer_dict2, model_layer_dict3 = init_coverage_tables(model1, model2, model3)
-print(model_layer_dict1)
+#print(model_layer_dict1)
 
 # ==============================================================================================
 # start gen inputs
@@ -141,19 +142,36 @@ for _ in range(args.seeds):
 
     # for adversarial image generation
     final_loss = K.mean(layer_output)
-    print(final_loss)
+    #print(final_loss)
 
     # we compute the gradient of the input picture wrt this loss
     grads = normalize(K.gradients(final_loss, input_tensor)[0])
-    print(grads)
+    #print(grads)
 
     # this function returns the loss and grads given the input picture
+    # K.backend.function : 
+    """
+    function(
+     inputs,
+     outputs,
+    updates=None,
+    **kwargs
+    )
+    Returns: return Function Class.
+             format of Output values is Numpy arrays.
+    """
+    # input_tensor はこの時点ではただのプレースホルダー.
+    # 中身は何も入っていない
+    print(input_tensor)
     iterate = K.function([input_tensor], [loss1, loss2, loss3, loss1_neuron, loss2_neuron, loss3_neuron, grads])
+
 
     # we run gradient ascent for 20 steps
     for iters in range(args.grad_iterations):
-        loss_value1, loss_value2, loss_value3, loss_neuron1, loss_neuron2, loss_neuron3, grads_value = iterate(
-            [gen_img])
+        loss_value1, loss_value2, loss_value3, loss_neuron1, loss_neuron2, loss_neuron3, grads_value = iterate([gen_img])
+        # grads_value = iterate[gen_img] はinput_tensorにgen_imgを入れたときのloss1-3, loss1-3_neuronの値
+        if iters %10 == 0:
+            print(grads_value)
         if   args.transformation == 'light':
             grads_value = constraint_light(grads_value)  # constraint the gradients value
         elif args.transformation == 'occl':
@@ -163,6 +181,7 @@ for _ in range(args.seeds):
             grads_value = constraint_black(grads_value)  # constraint the gradients value
 
         gen_img += grads_value * args.step
+        #print(gen_img)
         predictions1 = np.argmax(model1.predict(gen_img)[0])
         predictions2 = np.argmax(model2.predict(gen_img)[0])
         predictions3 = np.argmax(model3.predict(gen_img)[0])
