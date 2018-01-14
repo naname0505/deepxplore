@@ -7,8 +7,12 @@ from keras.models import Model
 
 
 # util function to convert a tensor into a valid image
+# TFで扱えるようにgen_diffの最初でx_test/255でテンソルへ変換していた
+# テンソルに変換したものを元の画像の画素値へ戻す関数
 def deprocess_image(x):
     x *= 255
+    # Given an interval, values outside the interval are clipped to the interval edges. For example, if an interval of [0, 1] is specified, values smaller than 0 become 0, and values larger than 1 become 1.
+    # np.clip[min,max]:配列の中身をmin以下のものをminへ,max以上をmaxへ
     x = np.clip(x, 0, 255).astype('uint8')
     return x.reshape(x.shape[1], x.shape[2])  # original shape (1,img_rows, img_cols,1)
 
@@ -63,22 +67,26 @@ def init_dict(model, model_layer_dict):
         for index in range(layer.output_shape[-1]):
             model_layer_dict[(layer.name, index)] = False
 
-
+# 活性化していないニューロンの中からランダムに一つを選び,
+# その層(layer_name)と何番目のニューロンか(index)の2つをreturn
 def neuron_to_cover(model_layer_dict):
     not_covered = [(layer_name, index) for (layer_name, index), v in model_layer_dict.items() if not v]
-    print("##############")
+    #print("##############")
     #print(not_covered)
-    print("##############")
+    #print("##############")
+
     if not_covered:
         layer_name, index = random.choice(not_covered)
     else:
         layer_name, index = random.choice(model_layer_dict.keys())
+    #print("$$$$$$$$$$$$$$"+str(index))
     return layer_name, index
 
-
+# modelの[活性化したニューロン数][全ニューロン数][活性化したニューロン数/全ニューロン数]
 def neuron_covered(model_layer_dict):
     #model_layer_dict.valuesはmodel内の層(neuronの数分)と,活性化の有無を示すTrue or Falseが記述
     covered_neurons = len([v for v in model_layer_dict.values() if v])
+    # ↑model_layer_dict内の活性化の是非がTrueのものの数
     total_neurons = len(model_layer_dict)
     return covered_neurons, total_neurons, covered_neurons / float(total_neurons)
 
