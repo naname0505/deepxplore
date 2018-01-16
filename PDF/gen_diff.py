@@ -80,7 +80,7 @@ for _ in range(args.seeds):
         print(bcolors.OKGREEN + 'averaged covered neurons %.3f' % averaged_nc + bcolors.ENDC)
 
         # save the result to disk
-        with open('generated_inputs', 'a') as f:
+        with open('../../DeepXplore_gen_img/PDF/generated_inputs', 'a') as f:
             f.write(
                 'Already causes differences: name: {}, label1:{}, label2: {}, label3: {}\n'.format(names[idx], label1,
                                                                                                    label2, label3))
@@ -146,7 +146,7 @@ for _ in range(args.seeds):
             print(bcolors.OKGREEN + 'averaged covered neurons %.3f' % averaged_nc + bcolors.ENDC)
 
             # save the result to disk
-            with open('generated_inputs', 'a') as f:
+            with open('../../DeepXplore_gen_img/PDF/generated_inputs', 'a') as f:
                 f.write(
                     'name: {}, label1:{}, label2: {}, label3: {}\n'.format(names[idx], label1, label2, label3))
                 f.write('changed features: {}\n\n'.format(features_changed(gen_pdf, orig_pdf, feat_names)))

@@ -108,7 +108,7 @@ for _ in range(args.seeds):
         gen_img_deprocessed = deprocess_image(gen_img)
 
         # save the result to disk
-        imsave('../../DeepXplore_gen_img/' + 'already_differ_' + str(label1) + '_' + str(
+        imsave('../../DeepXplore_gen_img/MNIST/' + 'already_differ_' + str(label1) + '_' + str(
             label2) + '_' + str(label3) + '.png', gen_img_deprocessed)
         continue
 
@@ -254,10 +254,10 @@ for _ in range(args.seeds):
             orig_img_deprocessed = deprocess_image(orig_img)
 
             # save the result to disk
-            imsave('../../DeepXplore_gen_img/' + args.transformation + '_' + str(predictions1) + '_' + str(
+            imsave('../../DeepXplore_gen_img/MNIST/' + args.transformation + '_' + str(predictions1) + '_' + str(
                 predictions2) + '_' + str(predictions3) + '.png',
                    gen_img_deprocessed)
-            imsave('../../DeepXplore_gen_img/' + args.transformation + '_' + str(predictions1) + '_' + str(
+            imsave('../../DeepXplore_gen_img/MNIST/' + args.transformation + '_' + str(predictions1) + '_' + str(
                 predictions2) + '_' + str(predictions3) + '_orig.png',
                    orig_img_deprocessed)
 
