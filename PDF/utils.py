@@ -72,7 +72,7 @@ def neuron_covered(model_layer_dict):
     return covered_neurons, total_neurons, covered_neurons / float(total_neurons)
 
 
-def scale(intermediate_layer_output, rmax=1, rmin=0):
+def scale(intermediate_layer_output, rmax=1, rmin=0): # maxを1へ,minを0にする正規化
     X_std = (intermediate_layer_output - intermediate_layer_output.min()) / (
         intermediate_layer_output.max() - intermediate_layer_output.min())
     X_scaled = X_std * (rmax - rmin) + rmin
@@ -89,7 +89,7 @@ def update_coverage(input_data, model, model_layer_dict, threshold=0):
 
     for i, intermediate_layer_output in enumerate(intermediate_layer_outputs):
         scaled = scale(intermediate_layer_output[0])
-        for num_neuron in xrange(scaled.shape[-1]):
+        for num_neuron in range(scaled.shape[-1]):
             if np.mean(scaled[..., num_neuron]) > threshold and not model_layer_dict[(layer_names[i], num_neuron)]:
                 model_layer_dict[(layer_names[i], num_neuron)] = True
 

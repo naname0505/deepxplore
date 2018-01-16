@@ -8,8 +8,7 @@
 # 閾値
 
 
-python gen_diff.py 'blackout' \
-                   0.1 \
+python gen_diff.py 0.1 \
                    10 \
                    10 \
                    10 \
