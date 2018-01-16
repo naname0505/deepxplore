@@ -95,7 +95,7 @@ def update_coverage(input_data, model, model_layer_dict, threshold=0):
     layer_names = [layer.name for layer in model.layers if
                    'flatten' not in layer.name and 'input' not in layer.name]
     # ここからkeras_nural.py のshow_intermediateと似た内容
-    # 中間層を出力とするmodelを定義して, 実際にデータを入力することで中間層の出力を保持する
+    # 中間層を出力とするmodelを定義し, 実際にデータを入力して中間層の出力を保持する
     # 中間層の値を出力層の値とするようなmodelを定義 
     intermediate_layer_model = Model(inputs=model.input,
                                      outputs=[model.get_layer(layer_name).output for layer_name in layer_names])
@@ -103,6 +103,7 @@ def update_coverage(input_data, model, model_layer_dict, threshold=0):
 
     for i, intermediate_layer_output in enumerate(intermediate_layer_outputs):
         scaled = scale(intermediate_layer_output[0]) #確か[0]がテスト,[1]が学習.これによってDOの有無とかを変更している. 要API参照
+        print(scaled)
         for num_neuron in range(scaled.shape[-1]):
             if np.mean(scaled[..., num_neuron]) > threshold and not model_layer_dict[(layer_names[i], num_neuron)]: # 平均が閾値(0-1)を越えて且つdictのboolがFalseなら
                 model_layer_dict[(layer_names[i], num_neuron)] = True #dictをTrueに

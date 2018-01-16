@@ -22,8 +22,7 @@ from utils import *
 parser = argparse.ArgumentParser(description='Main function for difference-inducing input generation in MNIST dataset')
 # 画像に加えるノイズの設定.
 #light           : 輝度変化
-#occl(occlusion) : 透過ノイズを乗せてる 論文の例を参照するとイメージしやすい
-#                  (矩形のサイズは調節可能)
+#occl(occlusion) : 透過ノイズを乗せてる 論文の例を参照するとイメージしやすい(矩形のサイズは調節可能)
 #black           : 黒点(矩形のサイズは調節可能)
 parser.add_argument('transformation', help="realistic transformation type", choices=['light', 'occl', 'blackout'])
 parser.add_argument('weight_diff', help="weight hyperparm to control differential behavior", type=float)
@@ -144,6 +143,7 @@ for _ in range(args.seeds):
         loss2 = K.mean(model2.get_layer('before_softmax').output[..., orig_label]) #任意の行のorig_label列目のみ
         loss3 = -args.weight_diff * K.mean(model3.get_layer('before_softmax').output[..., orig_label])
     
+    print("=====")
     print(index1)
     print("=====")
     print(index2)
@@ -160,6 +160,17 @@ for _ in range(args.seeds):
     #print("!!!!!!!!!!!!!"+str(final_loss))
 
     # we compute the gradient of the input picture wrt(with reference to) this loss
+    """
+    keras.backend.gradients(loss, variables)
+    Returns the gradients of variables with reference to loss.
+
+    Arguments :: loss: Scalar tensor to minimize.
+                 variables: List of variables.
+    Returns   :: A gradients tensor.
+ 
+
+
+    """
     grads = normalize(K.gradients(final_loss, input_tensor)[0])
     #print("11111"+str(grads))
 
@@ -184,9 +195,22 @@ for _ in range(args.seeds):
     # we run gradient ascent for 20 steps
     for iters in range(args.grad_iterations):
         loss_value1, loss_value2, loss_value3, loss_neuron1, loss_neuron2, loss_neuron3, grads_value = iterate([gen_img])
-        # grads_value = iterate[gen_img] はinput_tensorにgen_imgを入れたときの
+        # ..., grads_value = iterate[gen_img] はinput_tensorにgen_imgを入れたときの
         # loss1,2,3, loss1,2,3_neuron, gradsの7つの値が格納されている
         
+        print("=================================================")
+        print("# LOSS of model1:"+str(loss_value1)+" #")
+        print("# LOSS of model2:"+str(loss_value2)+" #")
+        print("# LOSS of model3:"+str(loss_value3)+" #")
+        print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
+        print("# LOSS of neuron1:"+str(loss_neuron1)+" #")
+        print("# LOSS of neuron2:"+str(loss_neuron2)+" #")
+        print("# LOSS of neuron3:"+str(loss_neuron3)+" #")
+        print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
+        print("# GRADS:"+str(grads_value)+" #")
+        print("=================================================")
+ 
+
         if   args.transformation == 'light':
             print("&& Use Constraint LIGHT &&")
             grads_value = constraint_light(grads_value)  # constraint the gradients value

@@ -41,6 +41,13 @@ K.set_learning_phase(0)
 model1 = Model1(input_tensor=input_tensor, load_weights=True)
 model2 = Model2(input_tensor=input_tensor, load_weights=True)
 model3 = Model3(input_tensor=input_tensor, load_weights=True)
+
+#"""
+print(model1.summary())
+print(model2.summary())
+print(model3.summary())
+#"""
+
 # init coverage table
 model_layer_dict1, model_layer_dict2, model_layer_dict3 = init_coverage_tables(model1, model2, model3)
 
