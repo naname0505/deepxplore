@@ -13,7 +13,7 @@ python -u gen_diff.py 'blackout' \
                    10 \
                    10 \
                    5 \
-                   20 \
+                   5 \
                    0.9
                    
 

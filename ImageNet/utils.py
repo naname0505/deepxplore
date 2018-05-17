@@ -128,14 +128,15 @@ def update_coverage(input_data, model, model_layer_dict, threshold=0):
     intermediate_layer_model = Model(inputs=model.input,
                                      outputs=[model.get_layer(layer_name).output for layer_name in layer_names])
     intermediate_layer_outputs = intermediate_layer_model.predict(input_data)
-
+    print("#")
+    print(len(intermediate_layer_outputs))
     for i, intermediate_layer_output in enumerate(intermediate_layer_outputs):
         scaled = scale(intermediate_layer_output[0])
+        print(i,scaled.shape,layer_names[i])
         for num_neuron in range(scaled.shape[-1]):
             _mean_neuron = np.mean(scaled[..., num_neuron])
-            print(np.argmax(scaled[...,num_neuron]))
-            print("####")
-            print("## "+str(_mean_neuron)+"|"+str(layer_names[i])+"-"+str(num_neuron))
+            #print(np.argmax(scaled[...,num_neuron]))
+            #print("## "+str(_mean_neuron)+"|"+str(layer_names[i])+"-"+str(num_neuron))
             if _mean_neuron > threshold and not model_layer_dict[(layer_names[i], num_neuron)]:
                 model_layer_dict[(layer_names[i], num_neuron)] = True
 
