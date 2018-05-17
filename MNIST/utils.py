@@ -82,7 +82,7 @@ def neuron_to_cover(model_layer_dict):
     #print("$$$$$$$$$$$$$$"+str(index))
     return layer_name, index
 
-# modelの[活性化したニューロン数][全ニューロン数][活性化したニューロン数/全ニューロン数]
+# modelの[活性化したニューロン数][全ニューロン数][活性化したニューロン数/全ニューロン数]をreturn
 def neuron_covered(model_layer_dict):
     #model_layer_dict.valuesはmodel内の層(neuronの数分)と,活性化の有無を示すTrue or Falseが記述
     covered_neurons = len([v for v in model_layer_dict.values() if v])
@@ -103,9 +103,10 @@ def update_coverage(input_data, model, model_layer_dict, threshold=0):
 
     for i, intermediate_layer_output in enumerate(intermediate_layer_outputs):
         scaled = scale(intermediate_layer_output[0]) #確か[0]がテスト,[1]が学習.これによってDOの有無とかを変更している. 要API参照
-        print(scaled)
+        #print(scaled)
         for num_neuron in range(scaled.shape[-1]):
-            if np.mean(scaled[..., num_neuron]) > threshold and not model_layer_dict[(layer_names[i], num_neuron)]: # 平均が閾値(0-1)を越えて且つdictのboolがFalseなら
+            if np.mean(scaled[..., num_neuron]) > threshold and not model_layer_dict[(layer_names[i], num_neuron)]: 
+                # 平均が設定した閾値(0-1)を越え、尚且つdictのboolがFalseなら、
                 model_layer_dict[(layer_names[i], num_neuron)] = True #dictをTrueに
 
 

@@ -12,6 +12,7 @@ from keras.applications.vgg19 import VGG19
 from keras.layers import Input
 from scipy.misc import imsave
 
+import sys 
 from configs import bcolors
 from utils import *
 
@@ -47,7 +48,12 @@ model2 = VGG19(input_tensor=input_tensor)
 model3 = ResNet50(input_tensor=input_tensor)
 # init coverage table
 model_layer_dict1, model_layer_dict2, model_layer_dict3 = init_coverage_tables(model1, model2, model3)
-
+print(model_layer_dict1)
+print("#")
+#print(model_layer_dict2)
+print("#")
+#print(model_layer_dict3)
+sys.exit()
 # ==============================================================================================
 # start gen inputs
 img_paths = image.list_pictures('./seeds', ext='JPEG')
@@ -60,8 +66,8 @@ for _ in range(args.seeds):
     if not label1 == label2 == label3:
         print(bcolors.OKGREEN + 'input already causes different outputs: {}, {}, {}'.format(decode_label(pred1),
                                                                                             decode_label(pred2),
-                                                                                            decode_label(
-                                                                                                pred3)) + bcolors.ENDC)
+                                                                                            decode_label(pred3))
+                                                                                            + bcolors.ENDC)
 
         update_coverage(gen_img, model1, model_layer_dict1, args.threshold)
         update_coverage(gen_img, model2, model_layer_dict2, args.threshold)

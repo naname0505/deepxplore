@@ -6,7 +6,7 @@ usage: python gen_diff.py -h
 from __future__ import print_function
 
 import argparse
-
+import os
 from keras.datasets import mnist
 from keras.layers import Input
 from scipy.misc import imsave
@@ -59,11 +59,11 @@ model1 = Model1(input_tensor=input_tensor)
 model2 = Model2(input_tensor=input_tensor)
 model3 = Model3(input_tensor=input_tensor)
 
-"""
+
 print(model1.summary())
 print(model2.summary())
 print(model3.summary())
-"""
+os.exit(0)
 
 # init coverage table
 model_layer_dict1, model_layer_dict2, model_layer_dict3 = init_coverage_tables(model1, model2, model3)
@@ -142,13 +142,14 @@ for _ in range(args.seeds):
         loss1 = K.mean(model1.get_layer('before_softmax').output[..., orig_label]) #任意の行のorig_label列目のみ
         loss2 = K.mean(model2.get_layer('before_softmax').output[..., orig_label]) #任意の行のorig_label列目のみ
         loss3 = -args.weight_diff * K.mean(model3.get_layer('before_softmax').output[..., orig_label])
-    
+    """
     print("=====")
     print(index1)
     print("=====")
     print(index2)
     print("=====")
     print(index3)
+    """
     loss1_neuron = K.mean(model1.get_layer(layer_name1).output[..., index1])
     loss2_neuron = K.mean(model2.get_layer(layer_name2).output[..., index2])
     loss3_neuron = K.mean(model3.get_layer(layer_name3).output[..., index3])
@@ -197,7 +198,7 @@ for _ in range(args.seeds):
         loss_value1, loss_value2, loss_value3, loss_neuron1, loss_neuron2, loss_neuron3, grads_value = iterate([gen_img])
         # ..., grads_value = iterate[gen_img] はinput_tensorにgen_imgを入れたときの
         # loss1,2,3, loss1,2,3_neuron, gradsの7つの値が格納されている
-        
+        """
         print("=================================================")
         print("# LOSS of model1:"+str(loss_value1)+" #")
         print("# LOSS of model2:"+str(loss_value2)+" #")
@@ -209,7 +210,7 @@ for _ in range(args.seeds):
         print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
         print("# GRADS:"+str(grads_value)+" #")
         print("=================================================")
- 
+        """ 
 
         if   args.transformation == 'light':
             print("&& Use Constraint LIGHT &&")
