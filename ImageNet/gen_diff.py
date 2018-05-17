@@ -48,12 +48,15 @@ model2 = VGG19(input_tensor=input_tensor)
 model3 = ResNet50(input_tensor=input_tensor)
 # init coverage table
 model_layer_dict1, model_layer_dict2, model_layer_dict3 = init_coverage_tables(model1, model2, model3)
+print("Finish creating the dict")
+"""
 print(model_layer_dict1)
 print("#")
-#print(model_layer_dict2)
+print(model_layer_dict2)
 print("#")
-#print(model_layer_dict3)
+print(model_layer_dict3)
 sys.exit()
+"""
 # ==============================================================================================
 # start gen inputs
 img_paths = image.list_pictures('./seeds', ext='JPEG')
@@ -127,6 +130,7 @@ for _ in range(args.seeds):
 
     # we run gradient ascent for 20 steps
     for iters in range(args.grad_iterations):
+        print("== ",iters," ==")
         loss_value1, loss_value2, loss_value3, loss_neuron1, loss_neuron2, loss_neuron3, grads_value = iterate(
             [gen_img])
         if args.transformation == 'light':
@@ -161,8 +165,11 @@ for _ in range(args.seeds):
             orig_img_deprocessed = deprocess_image(orig_img)
 
             # save the result to disk
+            print("Now Saving...")
             imsave('./generated_inputs/' + args.transformation + '_' + decode_label(pred1) + '_' + decode_label(
                 pred2) + '_' + decode_label(pred3) + '.png', gen_img_deprocessed)
             imsave('./generated_inputs/' + args.transformation + '_' + decode_label(pred1) + '_' + decode_label(
                 pred2) + '_' + decode_label(pred3) + '_orig.png', orig_img_deprocessed)
             break
+
+        print("Not enough... next")

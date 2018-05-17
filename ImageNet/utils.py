@@ -132,8 +132,34 @@ def update_coverage(input_data, model, model_layer_dict, threshold=0):
     for i, intermediate_layer_output in enumerate(intermediate_layer_outputs):
         scaled = scale(intermediate_layer_output[0])
         for num_neuron in range(scaled.shape[-1]):
+            _mean_neuron = np.mean(scaled[..., num_neuron])
+            print(np.argmax(scaled[...,num_neuron]))
+            print("####")
+            print("## "+str(_mean_neuron)+"|"+str(layer_names[i])+"-"+str(num_neuron))
+            if _mean_neuron > threshold and not model_layer_dict[(layer_names[i], num_neuron)]:
+                model_layer_dict[(layer_names[i], num_neuron)] = True
+
+###
+# update_coverageを拡張 output layerまでのそれぞれの層で活性化したものを抽出する。
+###
+def update_coverage_for_paths(input_data, model, model_layer_dict, threshold=0):
+    print("== Into update_coverage ==")
+    update_neuron = []
+    layer_names = [layer.name for layer in model.layers if
+                   'flatten' not in layer.name and 'input' not in layer.name]
+
+    intermediate_layer_model = Model(inputs=model.input,
+                                     outputs=[model.get_layer(layer_name).output for layer_name in layer_names])
+    intermediate_layer_outputs = intermediate_layer_model.predict(input_data)
+
+    for i, intermediate_layer_output in enumerate(intermediate_layer_outputs):
+        scaled = scale(intermediate_layer_output[0])
+        for num_neuron in range(scaled.shape[-1]):
             if np.mean(scaled[..., num_neuron]) > threshold and not model_layer_dict[(layer_names[i], num_neuron)]:
                 model_layer_dict[(layer_names[i], num_neuron)] = True
+                update_neuron.append((layer_names[i],num_neuron))
+    print(update_neuron)
+    print("== Out update_coverage ==")
 
 
 def full_coverage(model_layer_dict):
@@ -150,7 +176,7 @@ def fired(model, layer_name, index, input_data, threshold=0):
         return True
     return False
 
-
+# diverged = 分岐 
 def diverged(predictions1, predictions2, predictions3, target):
     #     if predictions2 == predictions3 == target and predictions1 != target:
     if not predictions1 == predictions2 == predictions3:

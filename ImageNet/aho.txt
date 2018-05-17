@@ -1,0 +1,7 @@
+Using TensorFlow backend.
+WARNING:tensorflow:From /Users/naname/.pyenv/versions/TF/lib/python3.6/site-packages/keras/backend/tensorflow_backend.py:1259: calling reduce_prod (from tensorflow.python.ops.math_ops) with keep_dims is deprecated and will be removed in a future version.
+Instructions for updating:
+keep_dims is deprecated, use keepdims instead
+WARNING:tensorflow:From /Users/naname/.pyenv/versions/TF/lib/python3.6/site-packages/tensorflow/python/ops/nn_impl.py:667: calling reduce_mean (from tensorflow.python.ops.math_ops) with keep_dims is deprecated and will be removed in a future version.
+Instructions for updating:
+keep_dims is deprecated, use keepdims instead

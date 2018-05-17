@@ -102,10 +102,13 @@ def update_coverage(input_data, model, model_layer_dict, threshold=0):
     intermediate_layer_outputs = intermediate_layer_model.predict(input_data)
 
     for i, intermediate_layer_output in enumerate(intermediate_layer_outputs):
-        scaled = scale(intermediate_layer_output[0]) #確か[0]がテスト,[1]が学習.これによってDOの有無とかを変更している. 要API参照
+        scaled = scale(intermediate_layer_output[0]) #確か[0]がテスト,[1]が学習.
+                                                     #これによってDOの有無とかを変更している. 要API参照
         #print(scaled)
         for num_neuron in range(scaled.shape[-1]):
-            if np.mean(scaled[..., num_neuron]) > threshold and not model_layer_dict[(layer_names[i], num_neuron)]: 
+            _mean_neuron = np.mean(scaled[..., num_neuron])
+            print(_mean_neuron)
+            if _mean_neuron > threshold and not model_layer_dict[(layer_names[i], num_neuron)]: 
                 # 平均が設定した閾値(0-1)を越え、尚且つdictのboolがFalseなら、
                 model_layer_dict[(layer_names[i], num_neuron)] = True #dictをTrueに
 
