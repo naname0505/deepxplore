@@ -120,32 +120,7 @@ def scale(intermediate_layer_output, rmax=1, rmin=0):
     X_scaled = X_std * (rmax - rmin) + rmin
     return X_scaled
 
-
 def update_coverage(input_data, model, model_layer_dict, threshold=0):
-    layer_names = [layer.name for layer in model.layers if
-                   'flatten' not in layer.name and 'input' not in layer.name]
-
-    intermediate_layer_model = Model(inputs=model.input,
-                                     outputs=[model.get_layer(layer_name).output for layer_name in layer_names])
-    intermediate_layer_outputs = intermediate_layer_model.predict(input_data)
-    print("#")
-    print(len(intermediate_layer_outputs))
-    for i, intermediate_layer_output in enumerate(intermediate_layer_outputs):
-        scaled = scale(intermediate_layer_output[0])
-        print(i,scaled.shape,layer_names[i])
-        for num_neuron in range(scaled.shape[-1]):
-            _mean_neuron = np.mean(scaled[..., num_neuron])
-            #print(np.argmax(scaled[...,num_neuron]))
-            #print("## "+str(_mean_neuron)+"|"+str(layer_names[i])+"-"+str(num_neuron))
-            if _mean_neuron > threshold and not model_layer_dict[(layer_names[i], num_neuron)]:
-                model_layer_dict[(layer_names[i], num_neuron)] = True
-
-###
-# update_coverageを拡張 output layerまでのそれぞれの層で活性化したものを抽出する。
-###
-def update_coverage_for_paths(input_data, model, model_layer_dict, threshold=0):
-    print("== Into update_coverage ==")
-    update_neuron = []
     layer_names = [layer.name for layer in model.layers if
                    'flatten' not in layer.name and 'input' not in layer.name]
 
@@ -158,10 +133,35 @@ def update_coverage_for_paths(input_data, model, model_layer_dict, threshold=0):
         for num_neuron in range(scaled.shape[-1]):
             if np.mean(scaled[..., num_neuron]) > threshold and not model_layer_dict[(layer_names[i], num_neuron)]:
                 model_layer_dict[(layer_names[i], num_neuron)] = True
-                update_neuron.append((layer_names[i],num_neuron))
-    print(update_neuron)
-    print("== Out update_coverage ==")
 
+###
+# update_coverageを拡張 output layerまでのそれぞれの層で活性化したものを抽出する。
+###
+def showing_paths(input_data, model):
+    #print("== Into showing_paths function ==")
+    _intermediate_value_list = []
+    layer_names = [layer.name for layer in model.layers if
+                   'flatten' not in layer.name and 'input' not in layer.name]
+    #中間層の値を出力とするモデルの定義
+    intermediate_layer_model = Model(inputs=model.input,
+                                     outputs=[model.get_layer(layer_name).output for layer_name in layer_names])
+    intermediate_layer_outputs = intermediate_layer_model.predict(input_data)
+    #print("#")
+    #print(len(intermediate_layer_outputs))
+    for i, intermediate_layer_output in enumerate(intermediate_layer_outputs):
+        scaled = scale(intermediate_layer_output[0])
+        if layer_names[i] == "fc1" or layer_names[i] == "fc2":
+            _intermediate_value_list.append(np.argmax(scaled))
+            #print(i,scaled.shape,layer_names[i],"/ argmax:",np.argmax(scaled)) # Show the neuron number which gives max value in each layer 
+        """
+        for num_neuron in range(scaled.shape[-1]):
+            _mean_neuron = np.mean(scaled[..., num_neuron])
+            #print(np.argmax(scaled[...,num_neuron]))
+            #print("## "+str(_mean_neuron)+"|"+str(layer_names[i])+"-"+str(num_neuron))
+            if _mean_neuron > threshold and not model_layer_dict[(layer_names[i], num_neuron)]:
+                model_layer_dict[(layer_names[i], num_neuron)] = True
+        """
+    return _intermediate_value_list
 
 def full_coverage(model_layer_dict):
     if False in model_layer_dict.values():
