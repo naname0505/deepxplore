@@ -140,8 +140,9 @@ def main():
 
 def create_image_path_set():
     print("####### WARNING  #######")
-    #img_paths = image.list_pictures('../../text-to-image/Data/ImageNet/jpg/', ext='JPEG')
+    img_paths = image.list_pictures('../../text-to-image/Data/ImageNet/jpg/test/', ext='JPEG')
     for _ in img_paths:
+        print(_)
         gen_img = preprocess_image(_)
         vgg16 = showing_paths(gen_img, model1)
         vgg19 = showing_paths(gen_img, model2)
@@ -149,11 +150,11 @@ def create_image_path_set():
 
         f = open("../../text-to-image/Data/ImageNet/text/"+str(_[-19:-5])+".txt", 'w') 
         for _x in vgg16:
-            f.write(str(_x) + "\n")
+            f.write(str(_x) + " ")
+        f.write("\n")
         for _x in vgg19:
-            f.write(str(_x) + "\n")
+            f.write(str(_x) + " ")
         f.close()
-        print("#################")
 
 
 if __name__ == "__main__":
